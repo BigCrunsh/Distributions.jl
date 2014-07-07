@@ -69,6 +69,7 @@ distlist = [Arcsine(),
           Hypergeometric(3.0, 2.0, 2.0),
           Hypergeometric(2.0, 3.0, 2.0),
           Hypergeometric(2.0, 2.0, 3.0),
+          Hypergeometric(60.0, 80.0, 100.0),
           InverseGaussian(1.0,1.0),
           InverseGaussian(2.0,7.0),
           InverseGamma(1.0, 1.0),
@@ -313,6 +314,36 @@ for d in distlist
         if !(isa(e,MethodError) && e.f == mode)
             rethrow(e)
         end
+    end
+
+    # Test moments by empirical estimates
+    srand(1)
+    println(d)
+    sample = rand(d,5000000)
+
+    if method_exists(mean,(typeof(d),))
+      m = mean(d)
+      if !isnan(m)
+        @test_approx_eq_eps m mean(sample) 1e-2
+      end
+    end
+    if method_exists(skewness,(typeof(d),))
+      v = var(d)
+      if !isnan(v)
+        @test_approx_eq_eps v var(sample) 1e-0
+      end
+    end
+    if method_exists(skewness,(typeof(d),))
+      s = skewness(d)
+      if !isnan(s)
+        @test_approx_eq_eps s skewness(sample)  1e-0
+      end
+    end
+    if method_exists(kurtosis,(typeof(d),))
+      k = kurtosis(d)
+      if !isnan(k)
+        @test_approx_eq_eps k kurtosis(sample) 1e-0
+      end
     end
 end
 
